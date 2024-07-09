@@ -30,7 +30,7 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     // listen for requests
     console.log('connected to db')
-    // seedDatabase();
+    seedDatabase();
     //seedOTPs();
   })
   .catch((error) => {
@@ -62,29 +62,53 @@ mongoose.connect(process.env.MONGO_URI)
 //       mongoose.connection.close();
 //   }
 // };
-  // const candidates = [
-  //   { name: 'Dr Rukaiya'},
-  //   { name: 'meriMaamRabia'},
-  //   { name: 'Saqib E'},
-  //   { name: 'Aneeta batman'},
-  //   { name: 'Moona Don'},
-  //   { name: 'Faizacutu'},
-  // ];
+const candidatesData = [
+  {
+      name: 'Dr Rukaiya',
+      description: 'Experienced in economic policy, with a focus on sustainable development. Has a proven track record of leadership in public service and community engagement.',
+      votes: 0,
+  },
+  {
+      name: 'Rabia Siddiqui',
+      description: 'Passionate advocate for education reform and youth empowerment. Known for innovative approaches to healthcare and social welfare initiatives.',
+      votes: 0,
+  },
+  {
+    name: 'Saqib Javeed',
+    description: 'Passionate advocate for education reform and youth empowerment. Known for innovative approaches to healthcare and social welfare initiatives.',
+    votes: 0,
+},
+  {
+    name: 'Moona Kawal',
+    description: 'Passionate advocate for education reform and youth empowerment. Known for innovative approaches to healthcare and social welfare initiatives.',
+    votes: 0,
+},
+{
+  name: 'Aneeta Siddiqui',
+  description: 'Passionate advocate for education reform and youth empowerment. Known for innovative approaches to healthcare and social welfare initiatives.',
+  votes: 0,
+},
+{
+  name: 'Faiza Farooq',
+  description: 'Passionate advocate for education reform and youth empowerment. Known for innovative approaches to healthcare and social welfare initiatives.',
+  votes: 0,
+},
+];
   
-  // // Function to seed candidates
-  // async function seedDatabase() {
-  //   try {
-  //     // Clear the Candidate collection
-  //     await Candidate.deleteMany({});
-  //     console.log('Candidate collection cleared');
+  // Function to seed candidates
+  async function seedDatabase() {
+    try {
+      // Clear the Candidate collection
+      await Candidate.deleteMany({});
+      console.log('Candidate collection cleared');
   
-  //     // Insert new candidate data
-  //     await Candidate.insertMany(candidates);
-  //     console.log('Candidates seeded successfully');
-  //   } catch (error) {
-  //     console.error('Error seeding candidates:', error);
-  //   }
-  // }
+      // Insert new candidate data
+      await Candidate.insertMany(candidatesData);
+      console.log('Candidates seeded successfully');
+    } catch (error) {
+      console.error('Error seeding candidates:', error);
+    }
+  }
 
 //   async function seedDatabase() {
 //   try {
