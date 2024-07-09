@@ -5,6 +5,7 @@ const cors = require('cors')
 const mongoose = require('mongoose')
 
 const UserV = require('./Models/userVModel');
+const OTP = require('./Models/otpModel');
 const Candidate = require('./Models/candidateModel');
 const Ballot = require('./Models/ballot1Model');
 
@@ -30,6 +31,7 @@ mongoose.connect(process.env.MONGO_URI)
     // listen for requests
     console.log('connected to db')
     // seedDatabase();
+    //seedOTPs();
   })
   .catch((error) => {
     console.log(error)
@@ -38,6 +40,28 @@ mongoose.connect(process.env.MONGO_URI)
   app.listen(process.env.PORT, () => {
     console.log('listening on port', process.env.PORT)
   })
+
+//   const predefinedOTPs = [
+//     { otp: '1111', used: false },
+//     { otp: '2222', used: false },
+//     { otp: '3333', used: false },
+//     { otp: '4444', used: false },
+//     { otp: '5555', used: false },
+//     { otp: '6666', used: false },
+//     { otp: '7777', used: false },
+//     { otp: '8888', used: false },
+// ];
+// const seedOTPs = async () => {
+//   try {
+//       await OTP.deleteMany({});  // Clear existing OTPs
+//       await OTP.insertMany(predefinedOTPs);
+//       console.log('Predefined OTPs seeded successfully');
+//       mongoose.connection.close();
+//   } catch (error) {
+//       console.error('Error seeding OTPs:', error);
+//       mongoose.connection.close();
+//   }
+// };
   // const candidates = [
   //   { name: 'Dr Rukaiya'},
   //   { name: 'meriMaamRabia'},

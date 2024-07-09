@@ -6,10 +6,9 @@ const validator = require('validator')
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     password: { type: String, required: true },
-    // role: { type: String, enum: ['admin', 'voter'], default: 'voter' }, // Example role management
-    // address: { type: String },
     email: { type: String },
-    phoneNumber: { type: String },
+    //phoneNumber: { type: String, required: true, unique: true},
+    hasVoted: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
 }, { timestamps: true });
 

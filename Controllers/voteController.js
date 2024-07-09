@@ -1,15 +1,59 @@
 const UserV = require('../Models/userVModel');
 const Candidate = require('../Models/candidateModel');
 const Ballot = require('../Models/ballot1Model');
+const OTP = require('../Models/otpModel');
 const mongoose = require('mongoose')
 
 // // Dummy OTP validation function (replace with your actual OTP validation logic)
-// function isValidOTP(otp) {
-//     // Add your OTP validation logic here
-//     return true;
-// }
+async function requestOTP(req, res) {
+    try {
+        // Find an unused OTP
+        const otpEntry = await OTP.findOne({ used: false, userId: null });
 
-async function generateBallotForm(req, res) {
+        if (!otpEntry) {
+            return res.status(404).json({ error: 'No available OTPs' });
+        }
+
+        res.json({ otp: otpEntry.otp });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to assign OTP' });
+    }
+}
+
+async function validateAndUseOTP(userId, otp) {
+    try {
+        // Find the OTP with the provided OTP and check if it is unused
+        const otpEntry = await OTP.findOne({ otp, used: false, userId: null });
+        if (!otpEntry) {
+            return false;  // OTP not found or already used
+        }
+
+        // Mark the OTP as used and assign it to the user
+        otpEntry.used = true;
+        otpEntry.userId = userId;
+        await otpEntry.save();
+
+        return true;  // OTP validated and marked as used
+    } catch (error) {
+        console.error(error);
+        throw new Error('Failed to validate OTP');
+    }
+}
+
+
+const getCandidates = async (req, res) => {
+    try {
+        const candidates = await Candidate.find(); // Retrieve all candidates from database
+        res.json(candidates); // Send the candidates as JSON response
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+}
+
+// const getWorkouts = async (req, res) => {
+const generateBallotForm = async (req, res) => {
     const userId = req.user._id;
     const { id } = req.params;
     // const { userId } = req.user;
@@ -24,6 +68,9 @@ async function generateBallotForm(req, res) {
         const user = await UserV.findById(userId);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
+        }
+        if (user.hasVoted) {
+            return res.status(403).json({ error: 'User has already voted' });
         }
 
         // Find the candidate
@@ -54,21 +101,26 @@ async function generateBallotForm(req, res) {
     }
 }
 
-async function submitVote(req, res) {
+const submitVote = async(req, res) => {
     const userId = req.user._id
     // const { userId } = req.user;
     const { candidateId, otp, ballotId } = req.body;
 
     try {
-        // Validate OTP (replace with your OTP validation logic)
-        // if (!isValidOTP(otp)) {
-        //     return res.status(401).json({ error: 'Invalid OTP' });
-        // }
+        // Validate OTP and mark it as used
+        const isValidOTP = await validateAndUseOTP(userId, otp);
+        if (!isValidOTP) {
+            return res.status(401).json({ error: 'Invalid OTP' });
+        }
 
         // Check if the user exists
         const user = await UserV.findById(userId);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
+        }
+        // Check if the user has already voted
+        if (user.hasVoted) {
+            return res.status(400).json({ error: 'User has already voted' });
         }
 
         // Find the candidate
@@ -100,6 +152,10 @@ async function submitVote(req, res) {
         // Save the updated candidate
         await candidate.save();
 
+        // Mark the user as having voted
+        user.hasVoted = true;
+        await user.save();
+
         res.json({ message: 'Vote submitted successfully', ballot: newBallot });
     } catch (error) {
         console.error(error);
@@ -111,4 +167,6 @@ async function submitVote(req, res) {
 module.exports = {
     generateBallotForm,
     submitVote,
+    requestOTP,
+    getCandidates
 };
