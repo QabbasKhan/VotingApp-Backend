@@ -2,9 +2,9 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const otpSchema = new Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'UserV'},
     otp: { type: String, required: true },
-    used: { type: Boolean, default: false },  // Flag to mark if the OTP has been used
+    used: { type: Boolean, default: false },
+    voterId: { type: mongoose.Schema.Types.ObjectId, ref: 'UserV', default: null } // Track which user is assigned the OTP
 }, { timestamps: true });
 
 const OTP = mongoose.model('OTP', otpSchema);

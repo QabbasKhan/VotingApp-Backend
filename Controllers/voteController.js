@@ -1,10 +1,12 @@
 const UserV = require('../Models/userVModel');
+const crypto = require('crypto');
 const Candidate = require('../Models/candidateModel');
 const Ballot = require('../Models/ballot1Model');
 const OTP = require('../Models/otpModel');
+const {encrypt, decrypt} = require('../Middlewares/cryptoF');
 const mongoose = require('mongoose')
 
-// // Dummy OTP validation function (replace with your actual OTP validation logic)
+//OTP
 async function requestOTP(req, res) {
     try {
         // Find an unused OTP
@@ -21,17 +23,19 @@ async function requestOTP(req, res) {
     }
 }
 
-async function validateAndUseOTP(userId, otp) {
+
+//OTPASSIGN
+async function validateAndUseOTP(voterId, otp) {
     try {
         // Find the OTP with the provided OTP and check if it is unused
-        const otpEntry = await OTP.findOne({ otp, used: false, userId: null });
+        const otpEntry = await OTP.findOne({ otp, used: false, voterId: null });
         if (!otpEntry) {
             return false;  // OTP not found or already used
         }
 
         // Mark the OTP as used and assign it to the user
         otpEntry.used = true;
-        otpEntry.userId = userId;
+        otpEntry.voterId = voterId;
         await otpEntry.save();
 
         return true;  // OTP validated and marked as used
@@ -41,7 +45,7 @@ async function validateAndUseOTP(userId, otp) {
     }
 }
 
-
+//FETCH CANDIDATES
 const getCandidates = async (req, res) => {
     try {
         const candidates = await Candidate.find(); // Retrieve all candidates from database
@@ -52,7 +56,8 @@ const getCandidates = async (req, res) => {
     }
 }
 
-// const getWorkouts = async (req, res) => {
+
+//BALLOT FORM
 const generateBallotForm = async (req, res) => {
     const userId = req.user._id;
     const { id } = req.params;
@@ -87,7 +92,7 @@ const generateBallotForm = async (req, res) => {
 
         // Prepare data for the ballot form
         const ballotForm = {
-            voterName: user.username,  // Assuming username is the voter's name
+            voterName: user.name,  // Assuming username is the voter's name
             voterId: user._id,         // Assuming _id is the voter's ID
             candidateName: candidate.name,
             candidateId: candidate._id,
@@ -101,20 +106,21 @@ const generateBallotForm = async (req, res) => {
     }
 }
 
+//CAST VOTE
 const submitVote = async(req, res) => {
-    const userId = req.user._id
+    const voterId = req.user._id
     // const { userId } = req.user;
     const { candidateId, otp, ballotId } = req.body;
 
     try {
         // Validate OTP and mark it as used
-        const isValidOTP = await validateAndUseOTP(userId, otp);
+        const isValidOTP = await validateAndUseOTP(voterId, otp);
         if (!isValidOTP) {
             return res.status(401).json({ error: 'Invalid OTP' });
         }
 
         // Check if the user exists
-        const user = await UserV.findById(userId);
+        const user = await UserV.findById(voterId);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -135,10 +141,29 @@ const submitVote = async(req, res) => {
             return res.status(400).json({ error: 'Ballot ID already used' });
         }
 
-        // Create a new ballot entry
+        const voterName = user.name; // Ensure this value is defined
+        const candidateName = candidate.name;
+
+                // Logging to verify values
+                console.log('Voter ID:', voterId);
+                console.log('Candidate ID:', candidateId);
+                console.log('OTP:', otp);
+                console.log('Ballot ID:', ballotId);
+                console.log('Voter Name:', voterName); 
+                console.log('Candidate Name:', candidateName); 
+        
+                if (!voterName || !candidateName) {
+                    throw new Error('Voter Name or Candidate Name is undefined');
+                }
+
+        const encryptedVoterName = encrypt(voterName); // Added encryption for voterName
+        const encryptedCandidateName = encrypt(candidateName); // Added encryption for candidateName
+        // Create a new ballot entryandidate.
         const newBallot = new Ballot({
-            userId,
+            voterId,
+            voterName: encryptedVoterName,
             candidateId,
+            candidateName: encryptedCandidateName,
             otpUsed: otp,
             ballotId,
         });

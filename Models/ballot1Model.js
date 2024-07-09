@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
 
 const ballotSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    voterId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    voterName: { type: String, required: true }, // Updated field name
     candidateId: { type: mongoose.Schema.Types.ObjectId, ref: 'Candidate', required: true },
+    candidateName: { type: String, required: true },
     otpUsed: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date },
