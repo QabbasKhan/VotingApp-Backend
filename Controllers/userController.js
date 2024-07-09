@@ -1,6 +1,6 @@
 const express = require('express')
 const jwt = require('jsonwebtoken')
-const User = require('../Models/userModel')
+const UserV = require('../Models/userVModel')
 
 //CreatingToken
 const createToken = (_id) => {
@@ -11,7 +11,7 @@ const createToken = (_id) => {
 const signupUser = async (req,res) => {
     const {name,email,password} = req.body;
     try{
-        const user = await User.signup(name, email, password);
+        const user = await UserV.signup(name, email, password);
         console.log(user.name);
         const token = createToken(user._id);
         res.status(200).json({email,token});
@@ -24,7 +24,7 @@ const loginUser = async(req,res)=>{
     const { email, password } = req.body
 
     try{
-        const user = await User.login(email, password)
+        const user = await UserV.login(email, password)
         console.log("Login successfuly")
         const token = createToken(user._id)
         console.log(token)

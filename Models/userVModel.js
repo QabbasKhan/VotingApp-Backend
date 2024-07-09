@@ -1,35 +1,16 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const validator = require('validator')
-const Wallet = require('../Models/walletModel')
+// const Wallet = require('../Models/walletModel')
 
-
-const Schema = mongoose.Schema
-
-const userSchema = new Schema({
-    name: {
-      type: String,
-      required: true,
-      unique: true
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    password: {
-        type:String,
-        required:true
-    },
-    wallet: { 
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: 'Wallet' 
-    },
-    rentedBike: { 
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Bike',
-      default: null }
-//  rentedBike: { type: mongoose.Schema.Types.ObjectId, ref: 'Bike', default: null }
+const userSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    password: { type: String, required: true },
+    // role: { type: String, enum: ['admin', 'voter'], default: 'voter' }, // Example role management
+    // address: { type: String },
+    email: { type: String },
+    phoneNumber: { type: String },
+    createdAt: { type: Date, default: Date.now },
 }, { timestamps: true });
 
 userSchema.statics.signup = async function(name, email, password) {
@@ -54,10 +35,9 @@ userSchema.statics.signup = async function(name, email, password) {
     const salt = await bcrypt.genSalt(10)
     const hash = await bcrypt.hash(password, salt)
 
-    const wallet = new Wallet();
-    await wallet.save();
+ 
   
-    const user = await this.create({ name, email, password: hash, wallet: wallet._id })
+    const user = await this.create({ name, email, password: hash })
 
     return user
   }
@@ -81,4 +61,4 @@ userSchema.statics.login = async function(email, password) {
     return user
   }
 
-  module.exports = mongoose.model('User', userSchema)
+  module.exports = mongoose.model('UserV', userSchema)
