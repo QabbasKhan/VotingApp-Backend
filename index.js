@@ -11,7 +11,8 @@ const Ballot = require('./Models/ballot1Model');
 
 
 const userRoutes = require('./Routes/userRoutes')
-const voteRoutes = require('./Routes/voteRoutes')
+const voteRoutes = require('./Routes/voteRoutes') 
+const adminRoutes = require('./Routes/adminRoutes')
 const bodyparser = require('body-parser')
 
  // Enable CORS for all routes
@@ -19,8 +20,10 @@ const app = express();
 app.use(cors());
 app.use(bodyparser.json());
 
+
 app.use('/api/user', userRoutes);
 app.use('/api/candidates', voteRoutes);
+app.use('/api/admin',adminRoutes);
 
 
 

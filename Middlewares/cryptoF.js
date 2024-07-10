@@ -11,12 +11,16 @@ const encrypt = (text) => {
 };
 
 const decrypt = (hash) => {
-    const parts = hash.split(':');
+    try{const parts = hash.split(':');
     const iv = Buffer.from(parts.shift(), 'hex');
     const encryptedText = Buffer.from(parts.join(':'), 'hex');
     const decipher = crypto.createDecipheriv(algorithm, secretKey, iv);
     const decrypted = Buffer.concat([decipher.update(encryptedText), decipher.final()]);
     return decrypted.toString();
+    }catch (error) {
+    console.error('Decryption error:', error);
+    return null; // Handle decryption errors gracefully
+}
 };
 
 module.exports = { encrypt, decrypt };

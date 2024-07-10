@@ -4,7 +4,8 @@ const Candidate = require('../Models/candidateModel');
 const Ballot = require('../Models/ballot1Model');
 const OTP = require('../Models/otpModel');
 const {encrypt, decrypt} = require('../Middlewares/cryptoF');
-const mongoose = require('mongoose')
+const requireAdminAuth = require('../Middlewares/requireAuth');
+const mongoose = require('mongoose');
 
 //OTP
 async function requestOTP(req, res) {
@@ -187,11 +188,29 @@ const submitVote = async(req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }
+// const decryptedBallots = async (req, res) => {
+//     try {
+//         const ballots = await Ballot.find(); // Retrieve all ballots
+//         const decryptedBallots = ballots.map(ballot => ({
+//             voterName: decrypt(ballot.voterName), // Decrypt voter name
+//             candidateName: decrypt(ballot.candidateName), // Decrypt candidate name
+//             ballotId: ballot.ballotId,
+//             createdAt: ballot.createdAt,
+//             updatedAt: ballot.updatedAt,
+//             status: ballot.status,
+//         }));
+//         res.json(decryptedBallots);
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ error: 'Failed to fetch decrypted ballots' });
+//     }
+// }
 
 
 module.exports = {
     generateBallotForm,
     submitVote,
     requestOTP,
-    getCandidates
+    getCandidates,
+    //decryptedBallots
 };
